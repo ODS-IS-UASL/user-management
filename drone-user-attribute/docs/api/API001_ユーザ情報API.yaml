@@ -1,0 +1,736 @@
+openapi: 3.0.3
+info:
+  title: ユーザ情報API
+  version: 1.0.0
+servers:
+  - url: https://{domain}/user/api/v1
+paths:
+  /user_info:
+    post:
+      tags: 
+        - pip
+      summary: ユーザ登録API
+      description: |-
+        指定されたユーザを登録する.<br>
+        操作ユーザ(Authorization:operateUid)と同一事業者に所属するユーザとして登録が可能. <br>
+        - 操作ユーザ(Authorization:operateUid)の指定が必須
+        - L3-identity-componentへの事業者情報登録もあわせて実施する
+        - 属性情報(ユーザID,所属事業者ID,ロール等)を登録する<br>
+        ### アクセスが許可されている事業者/ユーザ
+        - OpenFGAに"登録/更新/削除機能"のアクセス許可（認可タプル登録）されている事業者/ユーザ<br>
+        （上記の事業者/ユーザを用いてL3-identity-componentから取得したアクセストークン(Authorization:Bearer)の設定が必須）
+        ### ロールID定義
+          - "10": 航路運営者_責任者
+          - "11": 航路運営者_担当者
+          - "20": 運航事業者_責任者
+          - "21": 運航事業者_担当者
+      operationId: addUserInfo
+      security:
+        - operateUid: []
+        - bearer: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserInfoRequest'
+            example:
+              login_user_id: <登録するログインユーザID(≒メールアドレス)>
+              operator_name: <登録するユーザ名>
+              attribute:
+                roleIds: 
+                  - "<ロールID> ※10(航路運営者_責任者)、20(運航事業者_責任者)などをリスト指定"
+                  - "10"
+                  - "20"
+
+      responses:
+        "201":
+          description: 登録成功
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserInfoResponse"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/common.ResponseBadRequestError"
+        "401":
+          description: Un Authorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/common.ResponseUnAuthorizedError"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/common.ResponseForbiddenError"
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/common.ResponseNotFoundError"
+              example: 
+                code: 404
+                errorMessage: "指定されたoperateUid(xxx)は存在しません。"
+        "409":
+          description: Conflict
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/common.ResponseConflictError"
+              example: 
+                code: 409
+                errorMessage: "指定されたlogin_user_id(xxx@yyy)は既に存在しています。"
+        "415":
+          description: Media Type Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/common.ResponseMediaTypeError"
+        "500":
+          description: Internal Server Error サーバーエラー
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/common.ResponseInternalServerError"
+    delete:
+      tags: 
+        - pip
+      summary: ユーザ削除API
+      description: |-
+        指定されたユーザを削除する. <br>
+        操作ユーザ(Authorization:operateUid)と同一事業者に所属するユーザのみ削除が可能. <br>
+        - 操作ユーザ(Authorization:operateUid)の指定が必須
+        - L3-identity-componentの事業者情報ステータス更新(deleted_flag:true)もあわせて実施する
+        - 属性情報(ユーザID,事業者ID,ロール等)を削除する
+        - Authorization:operateUidに指定したUUIDと同一ユーザは削除不可
+        ### アクセスが許可されている事業者/ユーザ
+        - OpenFGAに"登録/更新/削除機能"のアクセス許可（認可タプル登録）されている事業者/ユーザ<br>
+        （上記の事業者/ユーザを用いてL3-identity-componentから取得したアクセストークン(Authorization:Bearer)の設定が必須）
+
+      operationId: deleteUserInfo
+      security:
+        - operateUid: []
+        - bearer: []
+      parameters:
+        - name: user_id
+          in: query
+          description: ユーザID(UUID)
+          required: true
+          schema:
+            type: string
+            default: available
+      responses:
+        "200":
+          description: 削除成功
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/common.ResponseSuccess"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/common.ResponseBadRequestError"
+              example:
+                code: 400
+                errorMessage: "操作ユーザ(Authorization:operateUid )と削除ユーザ(user_id)が同一のため削除できません。"
+        "401":
+          description: Un Authorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/common.ResponseUnAuthorizedError"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/common.ResponseForbiddenError"
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/common.ResponseNotFoundError"
+              example:
+                code: 404
+                errorMessage: "指定されたuser_id(123e4567-e89b-12d3-a456-426614174000)は存在しません。"
+        "500":
+          description: Internal Server Error サーバーエラー
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/common.ResponseInternalServerError"
+
+  /admin/user_info:
+    post:
+      tags: 
+        - pip
+      summary: ユーザ登録API (スーパーユーザ)
+      description: |-
+        指定された任意の事業者に所属するユーザを登録する.<br>
+        - L3-identity-componentへの事業者情報登録もあわせて実施する
+        - 属性情報(ユーザID,所属事業者ID,ロール等)を登録する
+        ### アクセスが許可されている事業者/ユーザ
+        - OpenFGAに"登録/更新/削除機能"のアクセス許可（認可タプル登録）されている事業者/ユーザ<br>
+        （上記の事業者/ユーザを用いてL3-identity-componentから取得したアクセストークン(Authorization:Bearer)の設定が必須）
+        ### ロールID定義
+          - "10": 航路運営者_責任者
+          - "11": 航路運営者_担当者
+          - "20": 運航事業者_責任者
+          - "21": 運航事業者_担当者
+      operationId: addUserInfoAdmin
+      security:
+        - bearer: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserInfoAdminRequest'
+            example:
+              login_user_id: <登録するログインユーザID(≒メールアドレス)>
+              operator_name: <登録するユーザ名>
+              attribute:
+                operatorId: <所属事業者ID>
+                roleIds: 
+                  - "<ロールID> ※10(航路運営者_責任者)、20(運航事業者_責任者)などをリスト指定"
+                  - "10"
+                  - "20"
+
+      responses:
+        "201":
+          description: 登録成功
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserInfoResponse"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/common.ResponseBadRequestError"
+        "401":
+          description: Un Authorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/common.ResponseUnAuthorizedError"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/common.ResponseForbiddenError"
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/common.ResponseNotFoundError"
+        "409":
+          description: Conflict
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/common.ResponseConflictError"
+              example: 
+                code: 409
+                errorMessage: "指定されたlogin_user_id(xxx@yyy)は既に存在しています。"
+        "415":
+          description: Media Type Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/common.ResponseMediaTypeError"
+        "500":
+          description: Internal Server Error サーバーエラー
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/common.ResponseInternalServerError"
+    delete:
+      tags: 
+        - pip
+      summary: ユーザ削除API (スーパーユーザ)
+      description: |-
+        指定された任意の事業者に所属するユーザを削除する. <br/>
+        - L3-identity-componentの事業者情報ステータス更新(deleted_flag:true)もあわせて実施する
+        - 属性情報(ユーザID,事業者ID,ロール等)を削除する
+        ### アクセスが許可されている事業者/ユーザ
+        - OpenFGAに"登録/更新/削除機能"のアクセス許可（認可タプル登録）されている事業者/ユーザ<br>
+        （上記の事業者/ユーザを用いてL3-identity-componentから取得したアクセストークン(Authorization:Bearer)の設定が必須）
+
+      operationId: deleteUserInfoAdmin
+      security:
+        - bearer: []
+      parameters:
+        - name: user_id
+          in: query
+          description: ユーザID(UUID)
+          required: true
+          schema:
+            type: string
+            default: available
+      responses:
+        "200":
+          description: 削除成功
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/common.ResponseSuccess"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/common.ResponseBadRequestError"
+              example:
+                code: 400
+                errorMessage: "操作ユーザ(Authorization:operateUid )と削除ユーザ(user_id)が同一のため削除できません。"
+        "401":
+          description: Un Authorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/common.ResponseUnAuthorizedError"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/common.ResponseForbiddenError"
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/common.ResponseNotFoundError"
+              example:
+                code: 404
+                errorMessage: "指定されたuser_id(123e4567-e89b-12d3-a456-426614174000)は存在しません。"
+        "500":
+          description: Internal Server Error サーバーエラー
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/common.ResponseInternalServerError"
+
+
+  /operator:
+    post:
+      tags: 
+        - pip
+      summary: 事業者登録API
+      description: |-
+        指定された任意の事業者を登録する. <br>
+        - L3-identity-componentへの事業者情報登録もあわせて実施する
+        - 属性情報(ユーザID,ロール等)を登録する
+        ### アクセスが許可されている事業者/ユーザ
+        - OpenFGAに"登録/更新/削除機能"のアクセス許可（認可タプル登録）されている事業者/ユーザ<br>
+        （上記の事業者/ユーザを用いてL3-identity-componentから取得したアクセストークン(Authorization:Bearer)の設定が必須）
+        ### ロールID定義
+          - "1": 航路運営者
+          - "2": 運航事業者
+          - "3": 関係者
+
+      operationId: addOperatorInfo
+      security:
+        - bearer: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OperatorInfoRequest'
+            example:
+              login_user_id: <登録するログインユーザID(≒メールアドレス)>
+              operator_name: <登録するユーザ名>
+              attribute:
+                roleIds: 
+                  - "<ロールID> ※1(航路運営者)、10(航路運営者_責任者)、などをリスト指定"
+                  - "1"
+                  - "2"
+                dipsAccountId: <DIPSアカウントID>
+                dipsAccountName: <DIPSアカウント名>
+                phone: <電話番号>
+                swimOperatorId: <SWIM連携用事業者ID(3桁)>
+
+      responses:
+        "201":
+          description: 登録成功
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OperatorInfoResponse"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/common.ResponseBadRequestError"
+        "401":
+          description: Un Authorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/common.ResponseUnAuthorizedError"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/common.ResponseForbiddenError"
+        "409":
+          description: Conflict
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/common.ResponseConflictError"
+              example: 
+                code: 409
+                errorMessage: "swimOperatorId(XXX)と紐づく事業者が既に存在するため登録できません。"
+        "415":
+          description: Media Type Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/common.ResponseMediaTypeError"
+        "500":
+          description: Internal Server Error サーバーエラー
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/common.ResponseInternalServerError"
+    delete:
+      tags: 
+        - pip
+      summary: 事業者削除API
+      description: |-
+        指定された任意の事業者を削除する. <br/>
+          - L3-identity-componentの事業者情報ステータス更新(deleted_flag:true)もあわせて実施する
+          - 属性情報(ユーザID,事業者ID,ロール等)を削除する
+        ### アクセスが許可されている事業者/ユーザ
+        - OpenFGAに"登録/更新/削除機能"のアクセス許可（認可タプル登録）されている事業者/ユーザ<br>
+        （上記の事業者/ユーザを用いてL3-identity-componentから取得したアクセストークン(Authorization:Bearer)の設定が必須）
+
+      operationId: deleteOperatorInfo
+      security:
+        - bearer: []
+      parameters:
+        - name: operator_id
+          in: query
+          description: 事業者ID(UUID)
+          required: true
+          schema:
+            type: string
+            default: available
+      responses:
+        "200":
+          description: 削除成功
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/common.ResponseSuccess"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/common.ResponseBadRequestError"
+              example:
+                code: 400
+                errorMessage: "クエリパラメータ(operator_id)を設定してください。"
+
+        "401":
+          description: Un Authorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/common.ResponseUnAuthorizedError"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/common.ResponseForbiddenError"
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/common.ResponseNotFoundError"
+        "409":
+          description: Conflict
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/common.ResponseConflictError"
+        "500":
+          description: Internal Server Error サーバーエラー
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/common.ResponseInternalServerError"
+
+components:
+  schemas:
+    UserInfoAdminRequest:
+      type: object
+      properties:
+        login_user_id:
+          type: string
+          description: "ログインID(メールアドレス)"
+          example: xxx@example.jp
+        operator_name:
+          type: string
+          description: "ユーザ名"
+        attribute:
+          $ref: "#/components/schemas/UserAttrParamAdmin"
+      required:
+        - login_user_id
+        - operator_name
+        - attribute
+
+    UserInfoRequest:
+      type: object
+      properties:
+        login_user_id:
+          type: string
+          description: "ログインID(メールアドレス)"
+          example: xxx@example.jp
+        operator_name:
+          type: string
+          description: "ユーザ名"
+        attribute:
+          $ref: "#/components/schemas/UserAttrParam"
+      required:
+        - login_user_id
+        - operator_name
+        - attribute
+
+    OperatorInfoRequest:
+      type: object
+      properties:
+        login_user_id:
+          type: string
+          description: "ログインID(メールアドレス)"
+          example: xxx@example.jp
+        operator_name:
+          type: string
+          description: "ユーザ名"
+        attribute:
+          $ref: "#/components/schemas/OperatorAttrParam"
+      required:
+        - login_user_id
+        - operator_name
+        - attribute
+
+    UserInfoResponse:
+      type: object
+      properties:
+        user_id:
+          type: string
+          description: "発行された事業者識別子（内部）：UUID"
+        operator_id:
+          type: string
+          description: "所属事業者ID：UUID"
+        password:
+          type: string
+          description: "登録されたパスワード"
+      required:
+        - user_id
+        - password
+        
+    OperatorInfoResponse:
+      type: object
+      properties:
+        operator_id:
+          type: string
+          description: "発行された事業者識別子（内部）：UUID"
+        password:
+          type: string
+          description: "登録されたパスワード"
+      required:
+        - operator_id
+        - password
+
+#### 共通 ####
+    UserAttrParamAdmin:
+      type: object
+      properties:
+        operatorId:
+          type: string
+          description: "所属事業者ID：UUID"
+          example: "123e4567-e89b-12d3-a456-426614174000"
+        roleIds:
+          type: array
+          items: 
+            type: string
+          example:
+            - "10"
+            - "20"
+      required:
+        - operatorId
+        - roleIds
+
+    UserAttrParam:
+      type: object
+      properties:
+        roleIds:
+          type: array
+          items: 
+            type: string
+          example:
+            - "10"
+            - "20"
+      required:
+        - roleIds
+
+    OperatorAttrParam:
+      type: object
+      properties:
+        roleIds:
+          type: array
+          items: 
+            type: string
+          example:
+            - "1"
+            - "2"
+        dipsAccountId:
+          type: string
+        dipsAccountName:
+          type: string
+        phone:
+          type: string
+        swimOperatorId:
+          type: string
+      required:
+        - roleIds
+        - swimOperatorId
+
+    common.ResponseSuccess:
+      description: オブジェクト
+      type: object
+    common.ResponseBadRequestError:
+      description: エラーオブジェクト
+      type: object
+      properties:
+        code:
+          type: integer
+          description: エラーの種類を示すエラーコード
+          example: 400
+        errorMessage:
+          type: string
+          description: エラーの説明
+          example: "login_user_idは必須項目です。"
+      required:
+        - code
+        - errorMessage
+    common.ResponseUnAuthorizedError:
+      description: エラーオブジェクト
+      type: object
+      properties:
+        code:
+          type: integer
+          description: エラーの種類を示すエラーコード
+          example: 401
+        errorMessage:
+          type: string
+          description: エラーの説明
+          example: "認証に失敗しました。有効な認証情報を提供してください。"
+      required:
+        - code
+        - errorMessage
+    common.ResponseForbiddenError:
+      description: エラーオブジェクト
+      type: object
+      properties:
+        code:
+          type: integer
+          description: エラーの種類を示すエラーコード
+          example: 403
+        errorMessage:
+          type: string
+          description: エラーの説明
+          example: "アクセスが拒否されました。この操作を実行する権限がありません。"
+      required:
+        - code
+        - errorMessage
+    common.ResponseNotFoundError:
+      description: エラーオブジェクト
+      type: object
+      properties:
+        code:
+          type: integer
+          description: エラーの種類を示すエラーコード
+          example: 404
+        errorMessage:
+          type: string
+          description: エラーの説明
+          example: "指定されたoperatorId(123e4567-e89b-12d3-a456-426614174000)は存在しません。"
+      required:
+        - code
+        - errorMessage
+    common.ResponseConflictError:
+      description: エラーオブジェクト
+      type: object
+      properties:
+        code:
+          type: integer
+          description: エラーの種類を示すエラーコード
+          example: 409
+        errorMessage:
+          type: string
+          description: エラーの説明
+          example: "削除対象の事業者(123e4567-e89b-12d3-a456-426614174000)に所属するユーザが存在するため削除できません。"
+      required:
+        - code
+        - errorMessage
+    common.ResponseMediaTypeError:
+      description: エラーオブジェクト
+      type: object
+      properties:
+        code:
+          type: integer
+          description: エラーの種類を示すエラーコード
+          example: 415
+        errorMessage:
+          type: string
+          description: エラーの説明
+          example: "適切なメディアタイプ(application/json)を指定してください。"
+      required:
+        - code
+        - errorMessage
+    common.ResponseInternalServerError:
+      description: エラーオブジェクト
+      type: object
+      properties:
+        code:
+          type: integer
+          description: エラーの種類を示すエラーコード
+          example: 500
+        errorMessage:
+          type: string
+          description: エラーの説明
+          example: "予期しないシステムエラーが発生しました。"
+      required:
+        - code
+        - errorMessage
+        
+
+  securitySchemes:
+    # 操作ユーザUUID
+    operateUid:
+      type: http
+      scheme: operateUid
+    # アクセストークン
+    bearer:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

@@ -1,0 +1,25 @@
+## Spring Boot Actuator
+management:
+  endpoints:
+    web.base-path: /manage
+    enabled-by-default: false
+    web.exposure.include: health,info,env,loggers
+  endpoint:
+    health:
+      enabled: true
+      show-details: ALWAYS
+    info:
+      enabled: true
+    env:
+      enabled: true
+    loggers:
+      enabled: true
+  health:
+    defaults.enabled: true
+    #ping.enabled: true
+    #mail.enabled: false
+    #db.enabled: false
+    #redis.enabled: false
+    #diskspace.enabled: false
+  info:
+    build.enabled: true

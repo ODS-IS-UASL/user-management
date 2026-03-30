@@ -1,0 +1,47 @@
+version: 0.2
+
+phases:
+  install:
+    runtime-versions:
+      java: corretto21
+  pre_build:
+    commands:
+      - echo Logging in to Amazon ECR...
+      - aws --version
+      - AWS_ECR_PATH_BASE=${AWS_ACCOUNT_ID}.dkr.ecr.${REGION}.amazonaws.com
+      - AWS_ECR_PATH=${AWS_ECR_PATH_BASE}/${ECR_REPO_NAME}
+      - aws ecr get-login-password --region ${REGION} | docker login --username AWS --password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.${REGION}.amazonaws.com
+      - export CODEARTIFACT_AUTH_TOKEN=`aws codeartifact get-authorization-token --domain drone-domain --domain-owner ${AWS_ACCOUNT_ID} --region ${REGION} --query authorizationToken --output text`
+      - aws s3 cp ${SETTINGS_XML_PATH} .
+      - aws s3 cp ${CERTIFICATE_PATH} .
+  build:
+    commands:
+      - echo `date`
+      - echo `java -version`
+      - echo `ls`
+      - ROOT_DIR=`pwd`
+      - echo ${ROOT_DIR}
+      - echo "build start"
+      - mvn -s ./settings.xml clean package -Dmaven.test.skip
+      - mkdir -p build/bin
+      - cp -a ${MAIN_PROJECT}/target/*.jar build/bin
+      - cp broker.ts ./build/bin
+      - cp Dockerfile ./build/
+      - cp docker-entrypoint.sh ./build/bin/
+      - cd build
+      - docker build -t ${AWS_ECR_PATH} .
+      - docker tag ${AWS_ECR_PATH} ${AWS_ECR_PATH}:${IMAGE_TAG}
+      - echo `ls -R`
+      - echo "build end"
+  post_build:
+    commands:
+      - docker push ${AWS_ECR_PATH}:${IMAGE_TAG};
+      - echo SUCCESS
+      - echo Writing image definitions file...
+      - cd ${ROOT_DIR}
+      - echo `pwd`
+      - printf '[{"name":"%s","imageUri":"%s"}]' ${CONTAINER_NAME} ${AWS_ECR_PATH}:${IMAGE_TAG} > imagedefinitions.json
+      - cat imagedefinitions.json
+artifacts:
+  files:
+    - imagedefinitions.json

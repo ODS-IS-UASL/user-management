@@ -1,0 +1,74 @@
+■認可モデル登録APIコマンド
+curl -i -X POST    \
+-H "API-Key: {アクセストークン取得用APIキー}" \
+-H "Authorization: Bearer {アクセストークン}"  \
+-H "Content-Type: application/json"    \
+-d '{
+  "schema_version": "1.1",
+  "type_definitions": [
+    {
+      "type": "user",
+      "relations": {},
+      "metadata": null
+    },
+    {
+      "type": "role",
+      "relations": {
+        "member": {
+          "this": {}
+        }
+      },
+      "metadata": {
+        "relations": {
+          "member": {
+            "directly_related_user_types": [
+              {
+                "type": "user"
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "type": "document",
+      "relations": {
+        "can_read": {
+          "this": {}
+        },
+        "can_write": {
+          "this": {}
+        }
+      },
+      "metadata": {
+        "relations": {
+          "can_read": {
+            "directly_related_user_types": [
+              {
+                "type": "role",
+                "relation": "member"
+              }
+            ]
+          },
+          "can_write": {
+            "directly_related_user_types": [
+              {
+                "type": "role",
+                "relation": "member"
+              }
+            ]
+          }
+        }
+      }
+    }
+  ]
+}' \
+http://{L3-identity-componentのドメイン}/authz/stores/{ユーザ管理用ストアID}/authorization-models
+
+
+■認可モデル取得APIコマンド
+curl -i -X GET    \
+-H "API-Key: {アクセストークン取得用APIキー}" \
+-H "Authorization: Bearer {アクセストークン}"  \
+-H "Content-Type: application/json"    \
+http://{L3-identity-componentのドメイン}/authz/stores/{ユーザ管理用ストアID}/authorization-models

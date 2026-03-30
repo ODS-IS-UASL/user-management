@@ -1,0 +1,13 @@
+model
+  schema 1.1
+ 
+type user
+ 
+type role
+  relations
+    define member: [user]
+
+type document
+  relations
+    define can_read: [role#member]
+    define can_write: [role#member]
