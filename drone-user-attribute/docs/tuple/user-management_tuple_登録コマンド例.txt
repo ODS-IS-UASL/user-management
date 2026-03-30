@@ -1,0 +1,62 @@
+■機能毎のアクセス許可設定
+curl -i -X POST    \
+-H "API-Key: {アクセストークン取得用APIキー}"  \
+-H "Authorization: Bearer {アクセストークン}"  \
+-H "Content-Type: application/json"    \
+-d '{
+  "writes": {
+    "tuple_keys": [
+      {
+        "user": "role:drone_user_attribute_reader#member",
+        "relation": "can_read",
+        "object": "document:drone_user_attribute"
+      },
+      {
+        "user": "role:drone_user_attribute_writer#member",
+        "relation": "can_write",
+        "object": "document:drone_user_attribute"
+      }
+    ]
+  }
+}' \
+http://{L3-identity-componentのドメイン}/authz/stores/{ユーザ管理用ストアID}/write
+
+
+■登録/更新/削除機能アクセス許可コマンド
+curl -i -X POST    \
+-H "API-Key: {アクセストークン取得用APIキー}"  \
+-H "Authorization: Bearer {アクセストークン}"  \
+-H "Content-Type: application/json;"    \
+-d '{
+  "writes": {
+    "tuple_keys": [
+      {
+        "user": "user:{クライアントシステム認証用のアカウントのクライアントID(UUID) または ログインユーザのuser_id(ユーザの場合)/operator_id(事業者の場合)}",
+        "relation": "member",
+        "object": "role:drone_user_attribute_writer"
+      }
+    ]
+  }
+}' \
+http://{L3-identity-componentのドメイン}/authz/stores/{ユーザ管理用ストアID}/write
+
+
+
+■参照機能アクセス許可コマンド
+curl -i -X POST    \
+-H "API-Key: {アクセストークン取得用APIキー}"  \
+-H "Authorization: Bearer {アクセストークン}"  \
+-H "Content-Type: application/json;"    \
+-d '{
+  "writes": {
+    "tuple_keys": [
+      {
+        "user": "user:{クライアントシステム認証用のアカウントのクライアントID(UUID) または ログインユーザのuser_id(ユーザの場合)/operator_id(事業者の場合)}",
+        "relation": "member",
+        "object": "role:drone_user_attribute_reader"
+      }
+    ]
+  }
+}' \
+http://{L3-identity-componentのドメイン}/authz/stores/{ユーザ管理用ストアID}/write
+

@@ -1,0 +1,33 @@
+user.attribute:
+  idp:
+    url: 
+      operator:
+        post: ${IDP_POST_ENDPOINT}
+        get:  ${IDP_GET_ENDPOINT}
+        put: ${IDP_PUT_ENDPOINT}
+        attrput: ${IDP_ATTR_PUT_ENDPOINT}
+        fga: ${FGA_ENDPOINT}
+    idp_apikey_name: "API-Key"
+    idp_apikey: ${API_KEY}
+    fga_store_id: ${FGA_STORE_ID}
+    fga_resource_id: ${FGA_RESOURCE_ID}
+    fga_tuple_action_read: can_read
+    fga_tuple_action_write: can_write
+    idp_content_type: application/json
+  
+  auth_key_name: "operateUid"
+
+  operator_role:
+    "1": "航路運営者"
+    "2": "運航事業者" 
+    "3": "関係者"
+
+  user_role:
+    "10": "航路運営者_責任者"
+    "11": "航路運営者_担当者"
+    "20": "運航事業者_責任者"
+    "21": "運航事業者_担当者"
+
+  default_user: "system"
+  default_operator_address: "東京都"
+  default_open_operator_id: "10000000001"

@@ -1,0 +1,30 @@
+spring.application:
+  name: drone-user-attribute
+
+spring.profiles:
+  active: ${APPENV:dev}
+  default: dev
+  group:
+    dev: # ローカル環境
+#      - h2
+      - dev
+      - healthcheck
+      - com-common-dev
+      - user-attribute-pip-dev
+    test: # 検証環境
+      - test
+      - healthcheck
+      - user-attribute-pip-test
+    prod: # 本番環境
+      - prod
+      - healthcheck
+      - com-common-prod
+      - user-attribute-pip-prod
+
+server:
+  port: 8080
+  servlet:
+     context-path: /user
+
+#ドローン航路システムのAPIを実行する際の共通のベースパス
+drone-route-base-path : /api/v1

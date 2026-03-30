@@ -1,0 +1,16 @@
+## Tomcatワークディレクトリ
+server.tomcat:
+  basedir: ./target/tomcat.${server.port}
+
+## アクセスログ
+server.tomcat.accesslog:
+  enabled: true
+  directory: logs
+  prefix: ${spring.application.name}_access
+  suffix: .log
+  file-date-format: -yyyy-MM-dd
+  rotate: true
+  rename-on-rotate: true
+  max-days: 7
+  pattern: '%{yyyy/MM/dd HH:mm:ss.SSS}t %h "%r" %s %b %D "%{X-Forwarded-For}i" "%{User-Agent}i"'
+  locale: ja_JP

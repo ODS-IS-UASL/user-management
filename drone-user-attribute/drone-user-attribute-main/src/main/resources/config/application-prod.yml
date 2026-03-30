@@ -1,0 +1,37 @@
+spring.datasource:
+  driver-class-name: org.postgresql.Driver
+  url: jdbc:postgresql://${DB_HOSTNAME:localhost}:${DB_PORT:5432}/${DB_NAME:user_attribute}
+  username: ${DB_USERNAME:postgres}
+  password: ${DB_PASSWORD:postgres}
+  type: com.zaxxer.hikari.HikariDataSource
+  hikari:
+    auto-commit: false
+    minimum-idle: 10
+
+logging:
+  level:
+    '[jp.go.meti.drone.com.common.logging.aspect.LoggingAspect]' : DEBUG
+    '[com.zaxxer.hikari]': DEBUG
+    '[jp.go.meti.drone]': DEBUG
+
+server:
+  port: 8080
+
+drone:
+  commom:
+    logging:
+      aspect:
+        resultByteLoggingLimitSize: ${RESULT_BYTE_LOGGING_LIMIT_SIZE:1999}
+        resultStringLoggingLimitSize: ${RESULT_STRING_LOGGING_LIMIT_SIZE:999}
+drone.common.auth:
+  enabled: false
+  http-basic:
+    enabled: true
+
+spring.transaction:
+  rollback-on-commit-failure: true
+mybatis:
+  configuration:
+    map-underscore-to-camel-case: true
+
+spring.messages.basename: messages/messages

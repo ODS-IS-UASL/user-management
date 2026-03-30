@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE generatorConfiguration PUBLIC "-//mybatis.org//DTD MyBatis Generator Configuration 1.0//EN" "http://mybatis.org/dtd/mybatis-generator-config_1_0.dtd">
+<generatorConfiguration>
+	<context id="PostgresTables" targetRuntime="MyBatis3">
+
+		<plugin type="org.mybatis.generator.plugins.RowBoundsPlugin" />
+		<plugin type="org.mybatis.generator.plugins.VirtualPrimaryKeyPlugin" />
+		<plugin type="org.mybatis.generator.plugins.MapperAnnotationPlugin" />
+		<plugin type="org.mybatis.generator.plugins.SerializablePlugin" />
+		<plugin type="jp.go.meti.drone.tools.mbg.plugins.ForUpdatePlugin" />
+		<plugin type="jp.go.meti.drone.tools.mbg.plugins.LimitPlugin" />
+		<plugin type="com.softwareloop.mybatis.generator.plugins.LombokPlugin">
+			<!-- enable annotations -->
+			<property name="builder" value="true" />
+			<property name="allArgsConstructor" value="true" />
+			<!-- disable annotations -->
+			<property name="noArgsConstructor" value="false" />
+		</plugin>
+
+		<!-- スキーマ情報を取得する DB への接続設定 -->
+		<jdbcConnection
+			driverClass="${mybatis.generator.jdbcDriver}"
+			connectionURL="${mybatis.generator.jdbcURL}"
+			userId="${mybatis.generator.jdbcUserId}"
+			password="${mybatis.generator.jdbcPassword}" />
+
+		<!-- 日付型のフィールドをJavaのDatetimeAPIとして生成する設定 -->
+		<javaTypeResolver>
+			<property name="useJSR310Types" value="true" />
+		</javaTypeResolver>
+
+		<!-- SELECT 結果等を格納するドメインモデルを生成する設定 -->
+		<javaModelGenerator
+			targetPackage="jp.go.meti.drone.user_attr.repository.entity"
+			targetProject="src/main/java">
+			<property name="enableSubPackages" value="true" />
+			<property name="trimStrings" value="true" />
+		</javaModelGenerator>
+
+		<!-- SQL 設定が記述された XML を生成する設定 -->
+		<sqlMapGenerator
+			targetPackage="jp.go.meti.drone.user_attr.repository"
+			targetProject="src/main/resources">
+			<property name="enableSubPackages" value="true" />
+		</sqlMapGenerator>
+		
+		<!-- リポジトリインタフェースを生成する設定 -->
+		<javaClientGenerator type="XMLMAPPER"
+			targetPackage="jp.go.meti.drone.user_attr.repository"
+			targetProject="src/main/java">
+			<property name="enableSubPackages" value="true" />
+		</javaClientGenerator>
+
+		<!-- コードを生成するテーブルを指定 -->
+		<table tableName="user_attribute"
+			domainObjectName="UserAttributeEntity"
+			mapperName="UserAttributeRepository" modelType="flat">
+			<property name="ignoreQualifiersAtRuntime" value="true" />
+			<property name="useActualColumnNames" value="false" />
+		</table>
+		
+		<table tableName="operator_attribute"
+			domainObjectName="OperatorAttributeEntity"
+			mapperName="OperatorAttributeRepository" modelType="flat">
+			<property name="ignoreQualifiersAtRuntime" value="true" />
+			<property name="useActualColumnNames" value="false" />
+		</table>
+
+	</context>
+</generatorConfiguration>

@@ -1,0 +1,14 @@
+## ログレベル
+logging.level:
+  '[com.zaxxer.hikari]': DEBUG
+  '[jp.go.meti.drone]': DEBUG
+
+## Spring Boot Actuator
+management:
+  endpoints:
+    enabled-by-default: true
+    web.exposure.include: "*"
+
+## アクセスログ
+server.tomcat.accesslog:
+  buffered: false

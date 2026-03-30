@@ -1,0 +1,36 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>drone</groupId>
+		<artifactId>drone-user-attribute</artifactId>
+		<version>0.0.1-SNAPSHOT</version>
+		<relativePath>../</relativePath>
+	</parent>
+
+	<artifactId>drone-user-attribute-pip</artifactId>
+
+	<dependencies>
+		<dependency>
+			<groupId>drone</groupId>
+			<artifactId>drone-com-common</artifactId>
+		</dependency>
+
+		<!-- open api-->
+		<dependency>
+			<groupId>io.swagger.core.v3</groupId>
+			<artifactId>swagger-annotations</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>javax.annotation</groupId>
+			<artifactId>javax.annotation-api</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.auth0</groupId>
+			<artifactId>java-jwt</artifactId>
+		</dependency>
+	</dependencies>
+
+</project>
